@@ -66,7 +66,7 @@ Before you begin, ensure you have the following installed on your machine:
 |------------------|-----------------------------------------------|--------------------------------------------|
 | `MONGO_DB_URL`   | MongoDB connection string                     | `mongodb+srv://<username>:<password>@cluster.mongodb.net/zoropay` |
 | `PORT`           | Port number for the server                    | `4000`                                     |
-| `STRIPE_SECRET_KEY` | Secret key for Stripe API integration      | `sk_test_12rebgrevgervfefnejfbehfbjh0abcdef` |
+| `STRIPE_SECRET_KEY` | Secret key for Stripe API integration      | `skbrokvg revg......` |
 
 ---
 
