@@ -16,9 +16,22 @@ app.use(express.json());
 connectDB();
 
 
+app.use((req, res, next) => {
+    // Middleware to log request details with timestamp
+    const currentDate = new Date(); 
+    const formattedDate = currentDate.toISOString();
+    console.log(`[${formattedDate}] ${req.method} request to ${req.url}`);
+    next();
+});
 
 app.get("/test", (req, res) => {
+    console.log("App is running successfully");
     res.send("App is running successfully");
+})
+
+app.get("/health-check", (req, res) => {
+    console.log("App health check is successful");
+    res.send("App health check is successful");
 })
 
 
