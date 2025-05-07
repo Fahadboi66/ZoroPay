@@ -1,17 +1,10 @@
 import { useState, useEffect } from "react"
 import { toast } from "react-toastify"
 import * as api from "../services/api"
-import { Plus, Edit, Trash, User, Mail, Phone, Save, Search, ChevronDown } from "lucide-react"
+import { Plus, Edit, Trash, User, Mail, Phone, Search, ChevronDown } from "lucide-react"
 
 function Users() {
   const [users, setUsers] = useState([])
-  const [open, setOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState(null)
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phoneNo: "",
-  })
   const [searchTerm, setSearchTerm] = useState("")
   const [sortBy, setSortBy] = useState("name")
   const [sortOrder, setSortOrder] = useState("asc")
@@ -29,33 +22,58 @@ function Users() {
     }
   }
 
-  const handleOpen = (user = null) => {
-    if (user) {
-      setFormData(user)
-      setSelectedUser(user)
-    } else {
-      setFormData({ name: "", email: "", phoneNo: "" })
-      setSelectedUser(null)
+  const validateInput = (name, email, phoneNo) => {
+    if (!name || name.trim() === "") {
+      toast.error("Name is required")
+      return false
     }
-    setOpen(true)
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!email || !emailRegex.test(email)) {
+      toast.error("Invalid email format")
+      return false
+    }
+    const phoneRegex = /^\+?[\d\s-]{10,15}$/
+    if (!phoneNo || !phoneRegex.test(phoneNo)) {
+      toast.error("Invalid phone number (10-15 digits, may include +, spaces, or -)")
+      return false
+    }
+    return true
   }
 
-  const handleClose = () => {
-    setOpen(false)
-    setSelectedUser(null)
+  const handleOpen = (user = null) => {
+    let name, email, phoneNo
+    if (user) {
+      name = prompt("Enter name", user.name)
+      email = prompt("Enter email", user.email)
+      phoneNo = prompt("Enter phone number", user.phoneNo)
+    } else {
+      name = prompt("Enter name")
+      email = prompt("Enter email")
+      phoneNo = prompt("Enter phone number")
+    }
+
+    if (name === null || email === null || phoneNo === null) {
+      toast.info("User input cancelled")
+      return
+    }
+
+    if (!validateInput(name, email, phoneNo)) {
+      return
+    }
+
+    const formData = { name, email, phoneNo }
+    handleSubmit(user ? user._id : null, formData)
   }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault()
+  const handleSubmit = async (id, formData) => {
     try {
-      if (selectedUser) {
-        await api.updateUser(selectedUser._id, formData)
+      if (id) {
+        await api.updateUser(id, formData)
         toast.success("User updated successfully")
       } else {
         await api.createUser(formData)
         toast.success("User created successfully")
       }
-      handleClose()
       fetchUsers()
     } catch (error) {
       toast.error(error.response?.data?.message || "Error processing request")
@@ -63,7 +81,7 @@ function Users() {
   }
 
   const handleDelete = async (id) => {
-    if(!window.confirm("Are you sure you want to delete this user?")) return
+    if (!window.confirm("Are you sure you want to delete this user?")) return
     try {
       await api.deleteUser(id)
       toast.success("User deleted successfully")
@@ -73,12 +91,12 @@ function Users() {
     }
   }
 
-  const filteredUsers = users.filter(
+  const filteredUsers = users ? users.filter(
     (user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.phoneNo.includes(searchTerm),
-  )
+  ) : []
 
   const sortedUsers = [...filteredUsers].sort((a, b) => {
     if (a[sortBy] < b[sortBy]) return sortOrder === "asc" ? -1 : 1
@@ -175,98 +193,8 @@ function Users() {
           </ul>
         </div>
       </div>
-
-      {open && (
-        <div
-          className="fixed inset-0 z-50 overflow-y-auto"
-          aria-labelledby="modal-title"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-            <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
-              &#8203;
-            </span>
-            <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                <div className="sm:flex sm:items-start">
-                  <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                    <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                      {selectedUser ? "Edit User" : "Add New User"}
-                    </h3>
-                    <div className="mt-2">
-                      <form onSubmit={handleSubmit} className="space-y-4">
-                        <div>
-                          <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                            Name
-                          </label>
-                          <input
-                            type="text"
-                            name="name"
-                            id="name"
-                            value={formData.name}
-                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                            Email
-                          </label>
-                          <input
-                            type="email"
-                            name="email"
-                            id="email"
-                            value={formData.email}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="phoneNo" className="block text-sm font-medium text-gray-700">
-                            Phone Number
-                          </label>
-                          <input
-                            type="tel"
-                            name="phoneNo"
-                            id="phoneNo"
-                            value={formData.phoneNo}
-                            onChange={(e) => setFormData({ ...formData, phoneNo: e.target.value })}
-                            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 transition duration-200"
-                            required
-                          />
-                        </div>
-                      </form>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                <button
-                  type="submit"
-                  onClick={handleSubmit}
-                  className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm transition duration-200"
-                >
-                  <Save className="mr-2 w-4 h-4" /> {selectedUser ? "Update" : "Create"}
-                </button>
-                <button
-                  type="button"
-                  onClick={handleClose}
-                  className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition duration-200"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
 
 export default Users
-
