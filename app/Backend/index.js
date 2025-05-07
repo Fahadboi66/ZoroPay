@@ -24,12 +24,12 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/test", (req, res) => {
+app.get("/api/test", (req, res) => {
     console.log("App is running successfully");
     res.send("App is running successfully");
 })
 
-app.get("/health-check", (req, res) => {
+app.get("/api/health-check", (req, res) => {
     console.log("App health check is successful");
     res.send("App health check is successful");
 })
