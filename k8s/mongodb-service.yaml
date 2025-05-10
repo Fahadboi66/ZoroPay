@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: zoropay-mongodb-service
+  namespace: zoropay
+spec:
+  selector:
+    app: zoropay-mongodb
+  ports:
+  - port: 27017
+    targetPort: 27017
+  type: ClusterIP

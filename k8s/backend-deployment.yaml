@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zoropay-backend
+  namespace: zoropay
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: zoropay-backend
+  template:
+    metadata:
+      labels:
+        app: zoropay-backend
+    spec:
+      containers:
+        - name: zoropay-backend
+          image: fahadboi66/zoropay-backend:v1
+          ports:
+            - containerPort: 4000
+          env:
+            - name: MONGO_DB_URL
+              value: "mongodb://zoropay-mongodb-service:27017/SCD-PROJECT"
+            - name: PORT
+              value: "4000"
+            - name: STRIPE_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: zoropay-secrets
+                  key: STRIPE_SECRET_KEY

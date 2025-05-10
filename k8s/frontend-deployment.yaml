@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zoropay-frontend
+  namespace: zoropay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zoropay-frontend
+  template:
+    metadata:
+      labels:
+        app: zoropay-frontend
+    spec:
+      containers:
+      - name: zoropay-frontend
+        image: fahadboi66/zoropay-frontend:v1
+        ports:
+        - containerPort: 80

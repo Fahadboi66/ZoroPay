@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: zoropay-mongodb
+  namespace: zoropay
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zoropay-mongodb
+  template:
+    metadata:
+      labels:
+        app: zoropay-mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:4.4
+        ports:
+        - containerPort: 27017
